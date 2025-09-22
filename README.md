@@ -2,7 +2,7 @@
 
 Control the mouse with hand motion capture
 
-https://github.com/user-attachments/assets/test.mp4
+https://github.com/user-attachments/assets/70c5e198-73ad-4f4e-8482-2ace9f635b3a
 
 ## Features
 
