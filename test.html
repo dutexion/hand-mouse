@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .container {
+            text-align: center;
+            color: white;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+                background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+            }
+            100% {
+                width: 300px;
+                height: 300px;
+                opacity: 0;
+                background: radial-gradient(circle, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 100%);
+            }
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: particle-animation 1s ease-out forwards;
+        }
+
+        @keyframes particle-animation {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(
+                    calc(-50% + var(--x)),
+                    calc(-50% + var(--y))
+                ) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: spark-animation 0.8s ease-out forwards;
+        }
+
+        @keyframes spark-animation {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(
+                    calc(-50% + var(--tx)),
+                    calc(-50% + var(--ty))
+                ) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .click-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .burst {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: burst-animation 0.6s ease-out forwards;
+        }
+
+        @keyframes burst-animation {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(20);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(30);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Click Test</h1>
+        <p>Try to click anywhere!</p>
+    </div>
+
+    <div class="click-counter">
+        Clicks: <span id="counter">0</span>
+    </div>
+
+    <script>
+        let clickCount = 0;
+        const counter = document.getElementById('counter');
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FED766', '#FF6F61', '#6A0572', '#FFE66D', '#A8E6CF'];
+
+        document.addEventListener('click', function(e) {
+            clickCount++;
+            counter.textContent = clickCount;
+
+            createRipple(e.clientX, e.clientY);
+            createParticles(e.clientX, e.clientY);
+            createSparks(e.clientX, e.clientY);
+
+            if (clickCount % 10 === 0) {
+                createBurst(e.clientX, e.clientY);
+            }
+        });
+
+        function createRipple(x, y) {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            document.body.appendChild(ripple);
+
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        function createParticles(x, y) {
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+
+                const angle = (Math.PI * 2 * i) / 12;
+                const velocity = 100 + Math.random() * 100;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+
+                particle.style.setProperty('--x', vx + 'px');
+                particle.style.setProperty('--y', vy + 'px');
+
+                const size = 5 + Math.random() * 10;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.borderRadius = '50%';
+
+                document.body.appendChild(particle);
+
+                setTimeout(() => {
+                    particle.remove();
+                }, 1000);
+            }
+        }
+
+        function createSparks(x, y) {
+            for (let i = 0; i < 8; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'spark';
+                spark.style.left = x + 'px';
+                spark.style.top = y + 'px';
+
+                const angle = (Math.PI * 2 * i) / 8;
+                const distance = 150 + Math.random() * 100;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+
+                spark.style.setProperty('--tx', tx + 'px');
+                spark.style.setProperty('--ty', ty + 'px');
+
+                document.body.appendChild(spark);
+
+                setTimeout(() => {
+                    spark.remove();
+                }, 800);
+            }
+        }
+
+        function createBurst(x, y) {
+            const burst = document.createElement('div');
+            burst.className = 'burst';
+            burst.style.left = x + 'px';
+            burst.style.top = y + 'px';
+            burst.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]}, transparent)`;
+            document.body.appendChild(burst);
+
+            setTimeout(() => {
+                burst.remove();
+            }, 600);
+        }
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let trailX = 0;
+        let trailY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        setInterval(() => {
+            trailX += (mouseX - trailX) * 0.1;
+            trailY += (mouseY - trailY) * 0.1;
+
+            if (Math.random() > 0.8) {
+                const trail = document.createElement('div');
+                trail.style.position = 'absolute';
+                trail.style.left = trailX + 'px';
+                trail.style.top = trailY + 'px';
+                trail.style.width = '3px';
+                trail.style.height = '3px';
+                trail.style.background = 'rgba(255, 255, 255, 0.6)';
+                trail.style.borderRadius = '50%';
+                trail.style.pointerEvents = 'none';
+                trail.style.animation = 'particle-animation 1s ease-out forwards';
+                trail.style.setProperty('--x', '0px');
+                trail.style.setProperty('--y', '20px');
+                document.body.appendChild(trail);
+
+                setTimeout(() => {
+                    trail.remove();
+                }, 1000);
+            }
+        }, 50);
+    </script>
+</body>
+</html>
